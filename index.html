@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Traffic Sign Recognition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #141E30, #243B55);
+            color: #fff;
+        }
+        header, footer {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 1em;
+            text-align: center;
+        }
+        nav ul.nav-links {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 1em;
+        }
+        nav ul li a {
+            color: #00ffff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        section {
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: none;
+            transition: all 0.5s ease-in-out;
+        }
+        section.active {
+            display: block;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            font-size: 1em;
+        }
+        video, canvas, img {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 1em;
+        }
+        #screenshot, #output img {
+            display: none;
+            margin-top: 1em;
+        }
+        footer ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            padding: 0;
+        }
+        footer ul li {
+            margin: 0 1em;
+        }
+        #recognition-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2em;
+        }
+        #recognition-controls {
+            flex: 1;
+            min-width: 280px;
+        }
+        #videoContainer {
+            flex: 1;
+            min-width: 280px;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop id="backgroundVideo" style="position: fixed; right: 0; bottom: 0; min-width: 100%; min-height: 100%; z-index: -1;">
+        <source src="https://cdn.pixabay.com/video/2024/11/28/243776_tiny.mp4" type="video/mp4">
+    </video>
+
+    <header>
+        <h1>🚦 Smart Traffic Sign Recognition</h1>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#need">Need</a></li>
+                <li><a href="#how">How to Use</a></li>
+                <li><a href="#recognition">Recognition</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#feedback">Feedback</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="active">
+            <h2>Welcome to the Future of Road Safety</h2>
+            <p>This intelligent web system detects traffic signs in real time using live camera input or uploaded images. It gives instant results with visual and voice alerts.</p>
+        </section>
+
+        <section id="about">
+            <h2>About</h2>
+            <p>Powered by deep learning, our model classifies over 40+ traffic signs using a trained CNN. It helps users recognize important signs in seconds, with integrated accessibility for everyone.</p>
+        </section>
+
+        <section id="need">
+            <h2>Why This System Is Needed</h2>
+            <p>Road accidents caused by missed traffic signs are common. Our tool assists all drivers, especially new and elderly users, by making road rules clearer and safer to follow in real time.</p>
+        </section>
+
+        <section id="how">
+            <h2>How to Use</h2>
+            <ul>
+                <li>Click "Start Camera" to launch live recognition or upload an image.</li>
+                <li>Allow camera access when prompted.</li>
+                <li>The system will detect and speak the sign out loud for easy understanding.</li>
+                <li>Works on all devices and adjusts layout for screen size automatically.</li>
+            </ul>
+        </section>
+
+        <section id="recognition">
+            <h2>Live Recognition Interface</h2>
+            <div id="recognition-wrapper">
+                <div id="recognition-controls">
+                    <button onclick="startCamera()">Start Camera</button>
+                    <button onclick="stopCamera()">Stop Camera</button>
+                    <button onclick="takeScreenshot()">Take Screenshot</button>
+                    <button onclick="resetScreenshot()" id="resetBtn" style="display:none;">Reset Screenshot</button>
+                    <input type="file" accept="image/*" onchange="uploadImage(event)">
+                    <button onclick="predictUploadedImage()" id="predictBtn" style="display:none;">Predict</button>
+                    <button onclick="clearUploads()" id="refreshUploads" style="display:none;">Clear Uploads</button>
+                    <img id="screenshot" alt="Screenshot">
+                    <div id="output"></div>
+                </div>
+                <div id="videoContainer">
+                    <video id="video" autoplay muted></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <p><strong>Email:</strong> support@trafficsignai.com</p>
+            <p><strong>Phone:</strong> +91-9876543210</p>
+            <p><strong>Address:</strong> AI Solutions Pvt. Ltd., Pune, India</p>
+            <form method="POST" action="/contact">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                <button type="submit">Send Message</button>
+            </form>
+        </section>
+
+        <section id="feedback">
+            <h2>Feedback</h2>
+            <form method="POST" action="/feedback">
+                <textarea name="feedback" placeholder="We value your feedback..." rows="5" required></textarea>
+                <button type="submit">Submit Feedback</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Smart Traffic Sign Recognition. All rights reserved.</p>
+        <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+        </ul>
+    </footer>
+
+    <script>
+        let cameraStream;
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    cameraStream = stream;
+                    const video = document.getElementById('video');
+                    video.srcObject = stream;
+                    video.play();
+                    fetch('/start_detection');
+                })
+                .catch(err => console.error("Camera access denied:", err));
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('video');
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                fetch('/stop_detection');
+            }
+        }
+
+        function uploadImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                img.alt = 'Uploaded Image';
+                document.getElementById('output').innerHTML = '';
+                document.getElementById('output').appendChild(img);
+                document.getElementById('predictBtn').style.display = 'inline-block';
+                document.getElementById('refreshUploads').style.display = 'inline-block';
+                speak("Image uploaded. Click Predict to see results.");
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function predictUploadedImage() {
+            speak("Predicting the uploaded image...");
+            document.getElementById('output').innerHTML += '<p>Prediction result: [Example Traffic Sign Name]</p>';
+        }
+
+        function clearUploads() {
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('predictBtn').style.display = 'none';
+            document.getElementById('refreshUploads').style.display = 'none';
+            speak("All uploads and predictions cleared.");
+        }
+
+        function takeScreenshot() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const screenshot = document.getElementById('screenshot');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            screenshot.src = canvas.toDataURL('image/png');
+            screenshot.style.display = 'block';
+            document.getElementById('resetBtn').style.display = 'inline-block';
+        }
+
+        function resetScreenshot() {
+            const screenshot = document.getElementById('screenshot');
+            screenshot.src = '';
+            screenshot.style.display = 'none';
+            document.getElementById('resetBtn').style.display = 'none';
+        }
+
+        function speak(text) {
+            const msg = new SpeechSynthesisUtterance(text);
+            window.speechSynthesis.speak(msg);
+        }
+
+        document.querySelectorAll('nav ul li a').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('main section').forEach(section => section.classList.remove('active'));
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    if (target.id !== 'recognition') stopCamera();
+                    target.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
